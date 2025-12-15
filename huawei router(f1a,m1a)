@@ -1,0 +1,141 @@
+hostname
+loopback 
+ospf 
+mpls 
+p2p  
+ip route (199.1)
+vlan
+vsi (4000 4005 1029 1030 910) 
+ssh enable 
+
+
+igmp-snooping enable
+
+NTP:
+ntp-service authentication enable
+ntp-service authentication-keyid 45 authentication-mode md5 Dish@Home123
+ntp-service sync-interval 180
+ntp-service unicast-server 192.168.20.212
+clock timezone Nepal add 05:45:00
+
+ACL Adding :
+
+acl 2010
+description "allow-ssh"
+rule 5 permit source 192.168.100.0 0.0.0.255
+rule 10 permit source 192.168.20.0 0.0.0.255
+rule 15 permit source 192.168.35.0 0.0.0.255
+rule 20 permit source 192.168.12.0 0.0.0.255
+rule 25 permit source 192.168.199.0 0.0.0.255
+rule 30 permit source 192.168.1.0 0.0.0.255
+rule 35 permit source 192.168.2.0 0.0.0.255
+rule 40 permit source 10.250.0.0 0.0.0.255
+rule 45 permit source 10.10.65.0 0.0.0.255
+rule 50 permit source 10.251.0.0 0.0.0.255
+rule 100 deny
+quit
+ssh server acl 2010
+
+acl 2011
+description "allow-snmp"
+rule 5 permit source 192.168.20.225 0
+rule 10 permit source 192.168.20.198 0
+rule 15 permit source 192.168.1.10 0
+rule 20 permit source 192.168.1.11 0
+rule 25 permit source 192.168.2.10 0
+rule 30 permit source 192.168.2.11 0
+rule 35 permit source 192.168.35.0 0.0.0.255
+rule 40 permit source 192.168.20.132 0
+rule 45 permit source 192.168.20.35 0
+rule 50 permit source 192.168.20.10 0 
+rule 51 permit source 192.168.20.135 0
+rule 55 permit source 192.168.20.12 0
+rule 60 permit source 192.168.20.120 0
+rule 65 permit source 192.168.20.105 0
+rule 70 permit source 192.168.20.149 0 
+rule 100 deny
+quit
+snmp-agent acl 2011
+
+
+SNMP:
+
+snmp-agent
+snmp-agent community write cipher dish@123
+ 
+snmp-agent sys-info contact noc@dishhome.com.np
+snmp-agent sys-info location Butwal
+snmp-agent sys-info version v2c v3
+ 
+snmp-agent mib-view included iso-view iso
+snmp-agent group v3 dmn privacy read-view iso-view write-view iso-view notify-view iso-view
+snmp-agent target-host trap address udp-domain 192.168.2.11 params securityname Dish@123 v3 privacy
+snmp-agent target-host trap address udp-domain 192.168.2.12 params securityname Dish@123 v3 privacy
+ 
+snmp-agent usm-user v3 huawei
+snmp-agent usm-user v3 huawei group dmn
+snmp-agent usm-user v3 huawei authentication-mode md5 
+(enter password: Dish@123)
+snmp-agent usm-user v3 huawei privacy-mode aes128 
+(enter password: Dish@123)
+#
+snmp-agent extend error-code enable
+snmp-agent trap enable
+
+
+ospf :
+ospf 1 router-id 192.168.199.14
+ opaque-capability enable
+ area 0.0.0.0
+  network 10.250.0.218 0.0.0.1
+  network 10.250.0.220 0.0.0.1
+  network 192.168.199.14 0.0.0.00.0.0.
+  
+  
+MPLS:
+  mpls lsr-id 192.168.199.43
+#
+mpls
+#
+mpls l2vpn
+#
+vsi ENT-02-916
+ pwsignal ldp
+  vsi-id 916
+  peer 192.168.199.3
+  
+mpls ldp
+ #
+ ipv4-family
+#
+mpls ldp remote-peer BHI-PE
+ remote-ip 192.168.199.3  
+ 
+mpls ldp remote-peer 192.168.199.4
+ remote-ip 192.168.199.4
+
+VSI:
+vsi ENT-KNT-4005   
+pwsignal ldp
+vsi-id 4005
+peer 192.168.199.3
+peer 192.168.199.4
+commit
+
+L2-BINDING:
+ interface Vlanif19
+ l2 binding vsi POP-MGMT-19
+
+ssh enable :
+stelnet server enable 
+
+LOCAL USER:
+aaa
+local-user prajan password irreversible-cipher $1c$)3!r)_*atI$D"O;>F^r05F*mhF9msY2u'`0N*zfKH+xaZXf!d,<$
+ local-user prajan service-type ssh
+ local-user prajan level 3
+ local-user prajan state block fail-times 3 interval 5
+ 
+LICENSE :
+ license
+ active port-basic slot 2 port 0-31
