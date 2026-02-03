@@ -93,7 +93,7 @@ ospf 1 router-id 192.168.199.14
   
   
 MPLS:
-  mpls lsr-id 192.168.199.43
+  mpls lsr-id 192.168.199.14
 #
 mpls
 #
